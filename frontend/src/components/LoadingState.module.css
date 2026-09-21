@@ -1,0 +1,31 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  padding: 4rem 1rem;
+  color: var(--color-text-muted);
+  animation: fadeIn 0.3s ease;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid var(--glass-border);
+  border-top-color: var(--color-accent);
+  animation: spin 1s linear infinite, glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes glowPulse {
+  0% { box-shadow: 0 0 5px var(--color-accent-glow); }
+  50% { box-shadow: 0 0 15px var(--color-accent-glow); }
+  100% { box-shadow: 0 0 5px var(--color-accent-glow); }
+}

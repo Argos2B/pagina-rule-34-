@@ -1,0 +1,17 @@
+.cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 2rem 0;
+}
+
+.cloud > * {
+  animation: fadeUp 0.3s ease-out backwards;
+}
+
+/* Stagger animation based on pseudo-random nth-child since we don't know the exact count in CSS */
+.cloud > *:nth-child(n) { animation-delay: 0.05s; }
+.cloud > *:nth-child(2n) { animation-delay: 0.1s; }
+.cloud > *:nth-child(3n) { animation-delay: 0.15s; }
+.cloud > *:nth-child(4n) { animation-delay: 0.2s; }
+.cloud > *:nth-child(5n) { animation-delay: 0.25s; }

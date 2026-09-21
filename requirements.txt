@@ -1,0 +1,12 @@
+Django>=6.1,<7
+djangorestframework>=3.18,<4
+djangorestframework-simplejwt>=5.5,<6
+django-cors-headers>=4.9,<5
+django-filter>=25.1,<26
+django-environ>=0.12,<1
+psycopg[binary]>=3.2,<4
+Pillow>=12.3,<13
+gunicorn>=23.0,<24
+
+# Opcional: instalar y activar con USE_S3=True en .env
+# django-storages[s3]>=1.14,<2

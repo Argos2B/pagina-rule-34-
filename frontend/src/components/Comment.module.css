@@ -1,0 +1,105 @@
+.comment {
+  padding: 1rem;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(5px);
+}
+
+.comment::before {
+  content: '';
+  position: absolute;
+  top: 1rem;
+  bottom: 1rem;
+  left: -1px;
+  width: 3px;
+  background: var(--gradient-accent);
+  border-radius: 0 4px 4px 0;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+
+.comment:hover {
+  border-color: rgba(168, 85, 247, 0.3);
+  background: var(--color-bg-elevated-hover);
+}
+
+.comment:hover::before {
+  opacity: 1;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.author {
+  font-weight: 600;
+  color: var(--color-text);
+  transition: color 0.2s ease;
+}
+
+.author:hover {
+  color: var(--color-accent-hover);
+}
+
+.date {
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.actionBtn {
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.actionBtn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+}
+
+.actionBtn.danger:hover {
+  color: var(--color-danger);
+  background: rgba(244, 63, 94, 0.1);
+}
+
+.content {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.hidden {
+  opacity: 0.6;
+}
+
+.hidden .content {
+  font-style: italic;
+  color: var(--color-text-muted);
+}
