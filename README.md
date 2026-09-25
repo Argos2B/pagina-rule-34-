@@ -87,8 +87,10 @@ Para iniciar backend y frontend con un solo comando:
 chmod +x agente-ejecutar.sh
 ./agente-ejecutar.sh
 # o sin permisos de ejecución:
-bash agente-ejecutar.sh
+bash5 agente-ejecutar.sh
 ```
+
+> Usa un binario de Bash 5+ (en algunos sistemas se llama `bash` y en otros `bash5`).
 
 Variables opcionales:
 

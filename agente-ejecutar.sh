@@ -47,6 +47,12 @@ wait -n "$BACKEND_PID" "$FRONTEND_PID"
 FIRST_EXIT_CODE=$?
 set -e
 
+if ! kill -0 "$BACKEND_PID" 2>/dev/null && kill -0 "$FRONTEND_PID" 2>/dev/null; then
+  BACKEND_EXIT_CODE="$FIRST_EXIT_CODE"
+elif ! kill -0 "$FRONTEND_PID" 2>/dev/null && kill -0 "$BACKEND_PID" 2>/dev/null; then
+  FRONTEND_EXIT_CODE="$FIRST_EXIT_CODE"
+fi
+
 cleanup
 
 set +e
@@ -59,13 +65,6 @@ if [[ -z "$FRONTEND_EXIT_CODE" ]]; then
   FRONTEND_EXIT_CODE=$?
 fi
 set -e
-
-if [[ "$BACKEND_EXIT_CODE" -eq 127 ]]; then
-  BACKEND_EXIT_CODE=0
-fi
-if [[ "$FRONTEND_EXIT_CODE" -eq 127 ]]; then
-  FRONTEND_EXIT_CODE=0
-fi
 
 if [[ "$FIRST_EXIT_CODE" -ne 0 ]]; then
   EXIT_CODE="$FIRST_EXIT_CODE"
