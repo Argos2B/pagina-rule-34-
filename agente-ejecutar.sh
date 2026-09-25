@@ -5,11 +5,6 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$ROOT_DIR"
 FRONTEND_DIR="$ROOT_DIR/frontend"
 
-if (( BASH_VERSINFO[0] < 4 )) || (( BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 4 )); then
-  echo "Este script requiere Bash 4.4+."
-  exit 1
-fi
-
 if command -v setsid >/dev/null 2>&1; then
   SETSID_AVAILABLE=1
 else
@@ -51,11 +46,25 @@ else
 fi
 FRONTEND_PID=$!
 
-set +e
-wait -n "$BACKEND_PID" "$FRONTEND_PID"
-EXIT_CODE=$?
-set -e
+while kill -0 "$BACKEND_PID" 2>/dev/null && kill -0 "$FRONTEND_PID" 2>/dev/null; do
+  sleep 1
+done
+
 cleanup
-wait "$BACKEND_PID" 2>/dev/null || true
-wait "$FRONTEND_PID" 2>/dev/null || true
+
+set +e
+wait "$BACKEND_PID" 2>/dev/null
+BACKEND_EXIT_CODE=$?
+wait "$FRONTEND_PID" 2>/dev/null
+FRONTEND_EXIT_CODE=$?
+set -e
+
+if [[ "$BACKEND_EXIT_CODE" -ne 0 ]]; then
+  EXIT_CODE="$BACKEND_EXIT_CODE"
+elif [[ "$FRONTEND_EXIT_CODE" -ne 0 ]]; then
+  EXIT_CODE="$FRONTEND_EXIT_CODE"
+else
+  EXIT_CODE=0
+fi
+
 exit "$EXIT_CODE"

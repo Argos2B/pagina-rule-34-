@@ -82,8 +82,6 @@ chmod +x agente-ejecutar.sh
 ./agente-ejecutar.sh
 ```
 
-> Requiere Bash 4.4 o superior.
-
 ## Roles y permisos
 
 - **USER**: rol por defecto. Puede crear/editar/eliminar (borrado lógico) sus propias publicaciones, comentar, marcar favoritos y reportar contenido.
