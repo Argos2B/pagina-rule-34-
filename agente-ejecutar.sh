@@ -9,16 +9,9 @@ BACKEND_PORT="${BACKEND_PORT:-8000}"
 FRONTEND_HOST="${FRONTEND_HOST:-127.0.0.1}"
 FRONTEND_PORT="${FRONTEND_PORT:-5173}"
 
-WAIT_N_AVAILABLE=0
-(:) &
-WAIT_TEST_PID=$!
-set +e
-wait -n "$WAIT_TEST_PID" >/dev/null 2>&1
-WAIT_TEST_STATUS=$?
-set -e
-wait "$WAIT_TEST_PID" 2>/dev/null || true
-if [[ "$WAIT_TEST_STATUS" -eq 0 ]]; then
-  WAIT_N_AVAILABLE=1
+if (( BASH_VERSINFO[0] < 5 )); then
+  echo "Este script requiere Bash 5 o superior."
+  exit 1
 fi
 
 cleanup() {
@@ -50,27 +43,8 @@ BACKEND_EXIT_CODE=""
 FRONTEND_EXIT_CODE=""
 
 set +e
-if [[ "$WAIT_N_AVAILABLE" -eq 1 ]]; then
-  wait -n "$BACKEND_PID" "$FRONTEND_PID"
-  FIRST_EXIT_CODE=$?
-else
-  FIRST_EXIT_CODE=0
-  while true; do
-    if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
-      wait "$BACKEND_PID" 2>/dev/null
-      BACKEND_EXIT_CODE=$?
-      FIRST_EXIT_CODE=$BACKEND_EXIT_CODE
-      break
-    fi
-    if ! kill -0 "$FRONTEND_PID" 2>/dev/null; then
-      wait "$FRONTEND_PID" 2>/dev/null
-      FRONTEND_EXIT_CODE=$?
-      FIRST_EXIT_CODE=$FRONTEND_EXIT_CODE
-      break
-    fi
-    sleep 0.2
-  done
-fi
+wait -n "$BACKEND_PID" "$FRONTEND_PID"
+FIRST_EXIT_CODE=$?
 set -e
 
 cleanup
@@ -85,6 +59,13 @@ if [[ -z "$FRONTEND_EXIT_CODE" ]]; then
   FRONTEND_EXIT_CODE=$?
 fi
 set -e
+
+if [[ "$BACKEND_EXIT_CODE" -eq 127 ]]; then
+  BACKEND_EXIT_CODE=0
+fi
+if [[ "$FRONTEND_EXIT_CODE" -eq 127 ]]; then
+  FRONTEND_EXIT_CODE=0
+fi
 
 if [[ "$FIRST_EXIT_CODE" -ne 0 ]]; then
   EXIT_CODE="$FIRST_EXIT_CODE"
