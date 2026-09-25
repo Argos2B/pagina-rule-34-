@@ -9,8 +9,8 @@ BACKEND_PORT="${BACKEND_PORT:-8000}"
 FRONTEND_HOST="${FRONTEND_HOST:-127.0.0.1}"
 FRONTEND_PORT="${FRONTEND_PORT:-5173}"
 
-if (( BASH_VERSINFO[0] < 5 )); then
-  echo "Este script requiere Bash 5 o superior."
+if (( BASH_VERSINFO[0] < 4 )) || (( BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 3 )); then
+  echo "Este script requiere Bash 4.3 o superior."
   exit 1
 fi
 
