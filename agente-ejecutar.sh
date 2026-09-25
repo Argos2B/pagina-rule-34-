@@ -47,12 +47,6 @@ wait -n
 FIRST_EXIT_CODE=$?
 set -e
 
-if ! kill -0 "$BACKEND_PID" 2>/dev/null && kill -0 "$FRONTEND_PID" 2>/dev/null; then
-  BACKEND_EXIT_CODE="$FIRST_EXIT_CODE"
-elif ! kill -0 "$FRONTEND_PID" 2>/dev/null && kill -0 "$BACKEND_PID" 2>/dev/null; then
-  FRONTEND_EXIT_CODE="$FIRST_EXIT_CODE"
-fi
-
 cleanup
 
 set +e
