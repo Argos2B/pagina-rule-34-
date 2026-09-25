@@ -82,7 +82,7 @@ chmod +x agente-ejecutar.sh
 ./agente-ejecutar.sh
 ```
 
-> Requiere Bash 4.3 o superior.
+> Requiere Bash 4.4 o superior.
 
 ## Roles y permisos
 
