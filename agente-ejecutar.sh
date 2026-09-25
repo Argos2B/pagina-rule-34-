@@ -24,8 +24,10 @@ echo "Iniciando frontend..."
 setsid bash -c "cd \"$FRONTEND_DIR\" && npm run dev" &
 FRONTEND_PID=$!
 
+set +e
 wait -n "$BACKEND_PID" "$FRONTEND_PID"
 EXIT_CODE=$?
+set -e
 cleanup
 wait "$BACKEND_PID" 2>/dev/null || true
 wait "$FRONTEND_PID" 2>/dev/null || true
