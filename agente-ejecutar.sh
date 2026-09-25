@@ -9,10 +9,16 @@ BACKEND_PORT="${BACKEND_PORT:-8000}"
 FRONTEND_HOST="${FRONTEND_HOST:-127.0.0.1}"
 FRONTEND_PORT="${FRONTEND_PORT:-5173}"
 
-if help wait 2>/dev/null | grep -q -- ' -n '; then
+WAIT_N_AVAILABLE=0
+(:) &
+WAIT_TEST_PID=$!
+set +e
+wait -n "$WAIT_TEST_PID" >/dev/null 2>&1
+WAIT_TEST_STATUS=$?
+set -e
+wait "$WAIT_TEST_PID" 2>/dev/null || true
+if [[ "$WAIT_TEST_STATUS" -eq 0 ]]; then
   WAIT_N_AVAILABLE=1
-else
-  WAIT_N_AVAILABLE=0
 fi
 
 cleanup() {
