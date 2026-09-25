@@ -24,6 +24,11 @@ elif ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
   exit 1
 fi
 
+if ! command -v npm >/dev/null 2>&1; then
+  echo "No se encontró npm en PATH."
+  exit 1
+fi
+
 if (( BASH_VERSINFO[0] < 4 )) || (( BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 3 )); then
   echo "Este script requiere Bash 4.3 o superior."
   exit 1
