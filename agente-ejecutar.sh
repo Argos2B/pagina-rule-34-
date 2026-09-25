@@ -43,7 +43,7 @@ BACKEND_EXIT_CODE=""
 FRONTEND_EXIT_CODE=""
 
 set +e
-wait -n "$BACKEND_PID" "$FRONTEND_PID"
+wait -n
 FIRST_EXIT_CODE=$?
 set -e
 
