@@ -8,6 +8,15 @@ BACKEND_HOST="${BACKEND_HOST:-127.0.0.1}"
 BACKEND_PORT="${BACKEND_PORT:-8000}"
 FRONTEND_HOST="${FRONTEND_HOST:-127.0.0.1}"
 FRONTEND_PORT="${FRONTEND_PORT:-5173}"
+PYTHON_BIN="${PYTHON_BIN:-}"
+
+if [[ -z "$PYTHON_BIN" ]]; then
+  if command -v python3 >/dev/null 2>&1; then
+    PYTHON_BIN="python3"
+  else
+    PYTHON_BIN="python"
+  fi
+fi
 
 if (( BASH_VERSINFO[0] < 4 )) || (( BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 3 )); then
   echo "Este script requiere Bash 4.3 o superior."
@@ -40,7 +49,7 @@ trap cleanup EXIT INT TERM
 echo "Iniciando backend..."
 (
   cd "$BACKEND_DIR"
-  exec python manage.py runserver "${BACKEND_HOST}:${BACKEND_PORT}"
+  exec "$PYTHON_BIN" manage.py runserver "${BACKEND_HOST}:${BACKEND_PORT}"
 ) &
 BACKEND_PID=$!
 

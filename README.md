@@ -98,6 +98,7 @@ Variables opcionales:
 - `BACKEND_PORT` (default `8000`)
 - `FRONTEND_HOST` (default `127.0.0.1`)
 - `FRONTEND_PORT` (default `5173`)
+- `PYTHON_BIN` (default `python3` si existe, si no `python`)
 
 ## Roles y permisos
 
