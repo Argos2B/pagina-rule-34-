@@ -9,8 +9,8 @@ BACKEND_PORT="${BACKEND_PORT:-8000}"
 FRONTEND_HOST="${FRONTEND_HOST:-127.0.0.1}"
 FRONTEND_PORT="${FRONTEND_PORT:-5173}"
 
-if (( BASH_VERSINFO[0] < 5 )); then
-  echo "Este script requiere Bash 5 o superior."
+if (( BASH_VERSINFO[0] < 5 )) || (( BASH_VERSINFO[0] == 5 && BASH_VERSINFO[1] < 1 )); then
+  echo "Este script requiere Bash 5.1 o superior."
   exit 1
 fi
 
@@ -43,9 +43,15 @@ BACKEND_EXIT_CODE=""
 FRONTEND_EXIT_CODE=""
 
 set +e
-wait -n
+wait -n -p FINISHED_PID "$BACKEND_PID" "$FRONTEND_PID"
 FIRST_EXIT_CODE=$?
 set -e
+
+if [[ "$FINISHED_PID" == "$BACKEND_PID" ]]; then
+  BACKEND_EXIT_CODE="$FIRST_EXIT_CODE"
+elif [[ "$FINISHED_PID" == "$FRONTEND_PID" ]]; then
+  FRONTEND_EXIT_CODE="$FIRST_EXIT_CODE"
+fi
 
 cleanup
 

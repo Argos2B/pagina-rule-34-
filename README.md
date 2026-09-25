@@ -82,7 +82,7 @@ Para iniciar backend y frontend con un solo comando:
 # - dependencias backend instaladas (pip install -r requirements.txt)
 # - dependencias frontend instaladas (cd frontend && npm install)
 # - Python y Node.js/NPM disponibles en PATH
-# - Bash 5 o superior
+# - Bash 5.1 o superior
 
 chmod +x agente-ejecutar.sh
 ./agente-ejecutar.sh
@@ -90,7 +90,7 @@ chmod +x agente-ejecutar.sh
 bash agente-ejecutar.sh
 ```
 
-> Usa Bash 5+ (si tu sistema tiene ese binario como `bash5`, puedes usar `bash5 agente-ejecutar.sh`).
+> Usa Bash 5.1+ (si tu sistema tiene ese binario como `bash5`, puedes usar `bash5 agente-ejecutar.sh`).
 
 Variables opcionales:
 
