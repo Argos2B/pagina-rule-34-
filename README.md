@@ -73,6 +73,15 @@ python manage.py test                 # correr toda la suite de tests
 python manage.py test accounts        # correr tests de una app específica
 ```
 
+## Agente para ejecutar el proyecto
+
+Para iniciar backend y frontend con un solo comando:
+
+```bash
+chmod +x agente-ejecutar.sh
+./agente-ejecutar.sh
+```
+
 ## Roles y permisos
 
 - **USER**: rol por defecto. Puede crear/editar/eliminar (borrado lógico) sus propias publicaciones, comentar, marcar favoritos y reportar contenido.
