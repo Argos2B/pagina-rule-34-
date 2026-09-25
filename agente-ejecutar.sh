@@ -13,9 +13,15 @@ PYTHON_BIN="${PYTHON_BIN:-}"
 if [[ -z "$PYTHON_BIN" ]]; then
   if command -v python3 >/dev/null 2>&1; then
     PYTHON_BIN="python3"
-  else
+  elif command -v python >/dev/null 2>&1; then
     PYTHON_BIN="python"
+  else
+    echo "No se encontró python3 ni python en PATH."
+    exit 1
   fi
+elif ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
+  echo "No se encontró el ejecutable de Python configurado: $PYTHON_BIN"
+  exit 1
 fi
 
 if (( BASH_VERSINFO[0] < 4 )) || (( BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 3 )); then
