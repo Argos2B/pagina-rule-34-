@@ -78,9 +78,21 @@ python manage.py test accounts        # correr tests de una app específica
 Para iniciar backend y frontend con un solo comando:
 
 ```bash
+# Prerrequisitos:
+# - dependencias backend instaladas (pip install -r requirements.txt)
+# - dependencias frontend instaladas (cd frontend && npm install)
+# - Python y Node.js/NPM disponibles en PATH
+
 chmod +x agente-ejecutar.sh
 ./agente-ejecutar.sh
 ```
+
+Variables opcionales:
+
+- `BACKEND_HOST` (default `127.0.0.1`)
+- `BACKEND_PORT` (default `8000`)
+- `FRONTEND_HOST` (default `127.0.0.1`)
+- `FRONTEND_PORT` (default `5173`)
 
 ## Roles y permisos
 

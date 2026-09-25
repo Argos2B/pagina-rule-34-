@@ -4,6 +4,16 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$ROOT_DIR"
 FRONTEND_DIR="$ROOT_DIR/frontend"
+BACKEND_HOST="${BACKEND_HOST:-127.0.0.1}"
+BACKEND_PORT="${BACKEND_PORT:-8000}"
+FRONTEND_HOST="${FRONTEND_HOST:-127.0.0.1}"
+FRONTEND_PORT="${FRONTEND_PORT:-5173}"
+
+if help wait 2>/dev/null | grep -q -- ' -n '; then
+  WAIT_N_AVAILABLE=1
+else
+  WAIT_N_AVAILABLE=0
+fi
 
 cleanup() {
   if [[ -n "${BACKEND_PID:-}" ]] && kill -0 "$BACKEND_PID" 2>/dev/null; then
@@ -19,42 +29,43 @@ trap cleanup EXIT INT TERM
 echo "Iniciando backend..."
 (
   cd "$BACKEND_DIR"
-  exec python manage.py runserver
+  exec python manage.py runserver "${BACKEND_HOST}:${BACKEND_PORT}"
 ) &
 BACKEND_PID=$!
 
 echo "Iniciando frontend..."
 (
   cd "$FRONTEND_DIR"
-  exec npm run dev
+  exec npm run dev -- --host "$FRONTEND_HOST" --port "$FRONTEND_PORT"
 ) &
 FRONTEND_PID=$!
 
 BACKEND_EXIT_CODE=""
 FRONTEND_EXIT_CODE=""
-FIRST_EXIT_CODE=0
 
-while true; do
-  if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
-    set +e
-    wait "$BACKEND_PID" 2>/dev/null
-    BACKEND_EXIT_CODE=$?
-    set -e
-    FIRST_EXIT_CODE=$BACKEND_EXIT_CODE
-    break
-  fi
-
-  if ! kill -0 "$FRONTEND_PID" 2>/dev/null; then
-    set +e
-    wait "$FRONTEND_PID" 2>/dev/null
-    FRONTEND_EXIT_CODE=$?
-    set -e
-    FIRST_EXIT_CODE=$FRONTEND_EXIT_CODE
-    break
-  fi
-
-  sleep 0.2
-done
+set +e
+if [[ "$WAIT_N_AVAILABLE" -eq 1 ]]; then
+  wait -n "$BACKEND_PID" "$FRONTEND_PID"
+  FIRST_EXIT_CODE=$?
+else
+  FIRST_EXIT_CODE=0
+  while true; do
+    if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
+      wait "$BACKEND_PID" 2>/dev/null
+      BACKEND_EXIT_CODE=$?
+      FIRST_EXIT_CODE=$BACKEND_EXIT_CODE
+      break
+    fi
+    if ! kill -0 "$FRONTEND_PID" 2>/dev/null; then
+      wait "$FRONTEND_PID" 2>/dev/null
+      FRONTEND_EXIT_CODE=$?
+      FIRST_EXIT_CODE=$FRONTEND_EXIT_CODE
+      break
+    fi
+    sleep 0.2
+  done
+fi
+set -e
 
 cleanup
 
