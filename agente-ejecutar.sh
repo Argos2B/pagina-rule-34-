@@ -5,64 +5,68 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$ROOT_DIR"
 FRONTEND_DIR="$ROOT_DIR/frontend"
 
-if (( BASH_VERSINFO[0] < 4 )) || (( BASH_VERSINFO[0] == 4 && BASH_VERSINFO[1] < 4 )); then
-  echo "Este script requiere Bash 4.4+."
-  exit 1
-fi
-
-if command -v setsid >/dev/null 2>&1; then
-  SETSID_AVAILABLE=1
-else
-  SETSID_AVAILABLE=0
-fi
-
 cleanup() {
   if [[ -n "${BACKEND_PID:-}" ]] && kill -0 "$BACKEND_PID" 2>/dev/null; then
-    if [[ "$SETSID_AVAILABLE" -eq 1 ]]; then
-      kill -- "-$BACKEND_PID" 2>/dev/null || kill "$BACKEND_PID" 2>/dev/null || true
-    else
-      kill "$BACKEND_PID" 2>/dev/null || true
-    fi
+    kill "$BACKEND_PID" 2>/dev/null || true
   fi
   if [[ -n "${FRONTEND_PID:-}" ]] && kill -0 "$FRONTEND_PID" 2>/dev/null; then
-    if [[ "$SETSID_AVAILABLE" -eq 1 ]]; then
-      kill -- "-$FRONTEND_PID" 2>/dev/null || kill "$FRONTEND_PID" 2>/dev/null || true
-    else
-      kill "$FRONTEND_PID" 2>/dev/null || true
-    fi
+    kill "$FRONTEND_PID" 2>/dev/null || true
   fi
 }
 
 trap cleanup EXIT INT TERM
 
 echo "Iniciando backend..."
-if [[ "$SETSID_AVAILABLE" -eq 1 ]]; then
-  setsid bash -c "cd \"$BACKEND_DIR\" && python manage.py runserver" &
-else
-  bash -c "cd \"$BACKEND_DIR\" && python manage.py runserver" &
-fi
+(
+  cd "$BACKEND_DIR"
+  exec python manage.py runserver
+) &
 BACKEND_PID=$!
 
 echo "Iniciando frontend..."
-if [[ "$SETSID_AVAILABLE" -eq 1 ]]; then
-  setsid bash -c "cd \"$FRONTEND_DIR\" && npm run dev" &
-else
-  bash -c "cd \"$FRONTEND_DIR\" && npm run dev" &
-fi
+(
+  cd "$FRONTEND_DIR"
+  exec npm run dev
+) &
 FRONTEND_PID=$!
 
-set +e
-wait -n "$BACKEND_PID" "$FRONTEND_PID"
-FIRST_EXIT_CODE=$?
-set -e
+BACKEND_EXIT_CODE=""
+FRONTEND_EXIT_CODE=""
+FIRST_EXIT_CODE=0
+
+while true; do
+  if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
+    set +e
+    wait "$BACKEND_PID" 2>/dev/null
+    BACKEND_EXIT_CODE=$?
+    set -e
+    FIRST_EXIT_CODE=$BACKEND_EXIT_CODE
+    break
+  fi
+
+  if ! kill -0 "$FRONTEND_PID" 2>/dev/null; then
+    set +e
+    wait "$FRONTEND_PID" 2>/dev/null
+    FRONTEND_EXIT_CODE=$?
+    set -e
+    FIRST_EXIT_CODE=$FRONTEND_EXIT_CODE
+    break
+  fi
+
+  sleep 0.2
+done
 
 cleanup
 
 set +e
-wait "$BACKEND_PID" 2>/dev/null
-BACKEND_EXIT_CODE=$?
-wait "$FRONTEND_PID" 2>/dev/null
-FRONTEND_EXIT_CODE=$?
+if [[ -z "$BACKEND_EXIT_CODE" ]]; then
+  wait "$BACKEND_PID" 2>/dev/null
+  BACKEND_EXIT_CODE=$?
+fi
+if [[ -z "$FRONTEND_EXIT_CODE" ]]; then
+  wait "$FRONTEND_PID" 2>/dev/null
+  FRONTEND_EXIT_CODE=$?
+fi
 set -e
 
 if [[ "$FIRST_EXIT_CODE" -ne 0 ]]; then
