@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from accounts.permissions import IsModeratorOrAbove
 from core.throttles import ContentWriteRateThrottle
 from moderation.utils import log_action
+from verification.permissions import IsVerifiedToPublish
 
 from .models import Category, Post, Tag
 from .permissions import IsAuthorOrModerator
@@ -64,7 +65,7 @@ class PostViewSet(viewsets.ModelViewSet):
         if self.action in ["hide", "restore"]:
             return [IsModeratorOrAbove()]
         if self.action == "create":
-            return [permissions.IsAuthenticated()]
+            return [permissions.IsAuthenticated(), IsVerifiedToPublish()]
         return [permissions.IsAuthenticated(), IsAuthorOrModerator()]
 
     def get_throttles(self):

@@ -11,6 +11,7 @@ urlpatterns = [
     path("api/", include("posts.urls")),
     path("api/", include("interactions.urls")),
     path("api/", include("moderation.urls")),
+    path("api/", include("verification.urls")),
 ]
 
 

@@ -8,6 +8,7 @@ from rest_framework.test import APITestCase
 
 from accounts.models import Role
 from posts.models import Post
+from verification.models import UserVerification, VerificationStatus
 
 from .models import Comment, Favorite, Report
 
@@ -21,10 +22,26 @@ def make_test_image():
     return SimpleUploadedFile("test.png", buffer.read(), content_type="image/png")
 
 
+def make_verified_user(username: str, email: str) -> User:
+    """Create a user with a VERIFIED UserVerification record."""
+    user = User.objects.create_user(username=username, email=email, password="S3curePassw0rd!")
+    UserVerification.objects.create(
+        user=user,
+        status=VerificationStatus.VERIFIED,
+        age_verified=True,
+        identity_verified=True,
+        face_match_verified=True,
+        liveness_verified=True,
+        provider="mock",
+        provider_reference=f"mock_{username}",
+    )
+    return user
+
+
 class InteractionsTestCase(APITestCase):
     def setUp(self):
-        self.author = User.objects.create_user(username="author3", email="author3@example.com", password="S3curePassw0rd!")
-        self.user = User.objects.create_user(username="user3", email="user3@example.com", password="S3curePassw0rd!")
+        self.author = make_verified_user("author3", "author3@example.com")
+        self.user = make_verified_user("user3", "user3@example.com")
         self.moderator = User.objects.create_user(
             username="mod3", email="mod3@example.com", password="S3curePassw0rd!", role=Role.MODERATOR
         )
@@ -54,7 +71,7 @@ class CommentTests(InteractionsTestCase):
 
     def test_non_owner_cannot_delete_comment(self):
         comment = Comment.objects.create(post=self.post, author=self.user, content="hi")
-        other = User.objects.create_user(username="stranger", email="stranger@example.com", password="S3curePassw0rd!")
+        other = make_verified_user("stranger", "stranger@example.com")
         self.client.force_authenticate(other)
         response = self.client.delete(f"/api/comments/{comment.id}/")
         self.assertIn(response.status_code, (status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND))

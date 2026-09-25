@@ -18,18 +18,50 @@ logger = logging.getLogger("verification.security")
 
 def can_user_publish(user) -> tuple[bool, str]:
     """
-    Compatibility hook for the paused identity verification gate.
+    Determine whether a user is allowed to create/upload content.
+
+    This is the CENTRAL authorization check. All publication endpoints
+    must call this. Hiding a UI button is NOT sufficient — this must run
+    server-side on every request.
 
     Args:
         user: An authenticated Django user instance.
 
     Returns:
-        (True, "") for authenticated users while identity verification is
-        temporarily disabled. Keep the function so future provider work has a
-        stable integration point.
+        (True, "") if the user is fully verified and allowed to publish.
+        (False, reason_code) if not allowed, with a machine-readable reason.
+
+    The reason_code is intentionally vague to avoid leaking bypass information.
     """
     if not user or not user.is_authenticated:
         return False, "unauthenticated"
+
+    # Moderators and above are exempt from the verification requirement
+    # (they are manually vetted by admins).
+    if hasattr(user, 'is_moderator') and user.is_moderator:
+        return True, ""
+
+    from .models import UserVerification, VerificationStatus
+    from django.utils import timezone
+    from datetime import timedelta
+
+    try:
+        verification = user.verification
+    except UserVerification.DoesNotExist:
+        _log_security_event(user.pk, "publish_blocked_unverified", {"reason": "no_verification_record"})
+        return False, "not_verified"
+
+    # Check expiry
+    if verification.expires_at and timezone.now() > verification.expires_at:
+        verification.status = VerificationStatus.EXPIRED
+        verification.save(update_fields=["status", "updated_at"])
+        _log_security_event(user.pk, "verification_expired", {})
+        return False, "verification_expired"
+
+    if not verification.is_fully_verified:
+        reason = f"status={verification.status}"
+        _log_security_event(user.pk, "publish_blocked_unverified", {"reason": reason})
+        return False, "not_verified"
 
     return True, ""
 

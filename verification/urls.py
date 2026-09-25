@@ -1,9 +1,24 @@
 """
-Dormant URL module for the future professional verification provider.
+URL endpoints for identity verification system.
 
-Identity/age verification is temporarily disabled at the product level, so no
-verification endpoints are exposed. Keep this module in place so the app can be
-reconnected later without changing project structure.
+Endpoints:
+- GET /api/verification/status/ — Get user's verification status
+- POST /api/verification/start/ — Start a new verification session
+- POST /api/verification/webhook/ — Receive webhook from identity provider
+- POST /api/verification/mock/complete/ — Dev-only: complete mock verification
 """
 
-urlpatterns = []
+from django.urls import path
+from .views import (
+    VerificationStatusView,
+    VerificationStartView,
+    VerificationWebhookView,
+    MockCompleteView,
+)
+
+urlpatterns = [
+    path("verification/status/", VerificationStatusView.as_view(), name="verification-status"),
+    path("verification/start/", VerificationStartView.as_view(), name="verification-start"),
+    path("verification/webhook/", VerificationWebhookView.as_view(), name="verification-webhook"),
+    path("verification/mock/complete/", MockCompleteView.as_view(), name="verification-mock-complete"),
+]

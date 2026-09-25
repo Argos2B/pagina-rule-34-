@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from accounts.permissions import IsModeratorOrAbove
 from core.throttles import ContentWriteRateThrottle
 from moderation.utils import log_action
+from verification.permissions import IsVerifiedToPublish
 
 from .models import Comment, Favorite, Report
 from .permissions import IsCommentAuthorOrModerator
@@ -57,7 +58,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         if self.action in ["hide", "unhide"]:
             return [IsModeratorOrAbove()]
         if self.action == "create":
-            return [permissions.IsAuthenticated(), IsCommentAuthorOrModerator()]
+            return [permissions.IsAuthenticated(), IsVerifiedToPublish(), IsCommentAuthorOrModerator()]
         return [permissions.IsAuthenticated(), IsCommentAuthorOrModerator()]
 
     def get_throttles(self):

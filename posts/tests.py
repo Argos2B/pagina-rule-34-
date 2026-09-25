@@ -7,6 +7,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from accounts.models import Role
+from verification.models import UserVerification, VerificationStatus
 
 from .models import Post
 
@@ -20,10 +21,26 @@ def make_test_image(name="test.png", fmt="PNG", size=(10, 10)):
     return SimpleUploadedFile(name, buffer.read(), content_type="image/png")
 
 
+def make_verified_user(username: str, email: str) -> User:
+    """Create a user with a VERIFIED UserVerification record."""
+    user = User.objects.create_user(username=username, email=email, password="S3curePassw0rd!")
+    UserVerification.objects.create(
+        user=user,
+        status=VerificationStatus.VERIFIED,
+        age_verified=True,
+        identity_verified=True,
+        face_match_verified=True,
+        liveness_verified=True,
+        provider="mock",
+        provider_reference=f"mock_{username}",
+    )
+    return user
+
+
 class PostCreationTests(APITestCase):
     def setUp(self):
-        self.author = User.objects.create_user(username="author", email="author@example.com", password="S3curePassw0rd!")
-        self.other_user = User.objects.create_user(username="other", email="other@example.com", password="S3curePassw0rd!")
+        self.author = make_verified_user("author", "author@example.com")
+        self.other_user = make_verified_user("other", "other@example.com")
         self.moderator = User.objects.create_user(
             username="moderator", email="mod@example.com", password="S3curePassw0rd!", role=Role.MODERATOR
         )
