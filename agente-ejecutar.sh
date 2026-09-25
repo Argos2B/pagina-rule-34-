@@ -66,14 +66,4 @@ if [[ -z "$FRONTEND_EXIT_CODE" ]]; then
 fi
 set -e
 
-if [[ "$FIRST_EXIT_CODE" -ne 0 ]]; then
-  EXIT_CODE="$FIRST_EXIT_CODE"
-elif [[ "$BACKEND_EXIT_CODE" -ne 0 ]]; then
-  EXIT_CODE="$BACKEND_EXIT_CODE"
-elif [[ "$FRONTEND_EXIT_CODE" -ne 0 ]]; then
-  EXIT_CODE="$FRONTEND_EXIT_CODE"
-else
-  EXIT_CODE=0
-fi
-
-exit "$EXIT_CODE"
+exit "$FIRST_EXIT_CODE"
