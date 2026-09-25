@@ -9,18 +9,30 @@ BACKEND_PORT="${BACKEND_PORT:-8000}"
 FRONTEND_HOST="${FRONTEND_HOST:-127.0.0.1}"
 FRONTEND_PORT="${FRONTEND_PORT:-5173}"
 
-if (( BASH_VERSINFO[0] < 5 )) || (( BASH_VERSINFO[0] == 5 && BASH_VERSINFO[1] < 1 )); then
-  echo "Este script requiere Bash 5.1 o superior."
+if (( BASH_VERSINFO[0] < 5 )); then
+  echo "Este script requiere Bash 5 o superior."
   exit 1
 fi
 
+CLEANUP_DONE=0
+
 cleanup() {
+  if [[ "$CLEANUP_DONE" -eq 1 ]]; then
+    return
+  fi
+  CLEANUP_DONE=1
+
   if [[ -n "${BACKEND_PID:-}" ]] && kill -0 "$BACKEND_PID" 2>/dev/null; then
     kill "$BACKEND_PID" 2>/dev/null || true
   fi
   if [[ -n "${FRONTEND_PID:-}" ]] && kill -0 "$FRONTEND_PID" 2>/dev/null; then
     kill "$FRONTEND_PID" 2>/dev/null || true
   fi
+
+  set +e
+  [[ -n "${BACKEND_PID:-}" ]] && wait "$BACKEND_PID" 2>/dev/null || true
+  [[ -n "${FRONTEND_PID:-}" ]] && wait "$FRONTEND_PID" 2>/dev/null || true
+  set -e
 }
 
 trap cleanup EXIT INT TERM
@@ -39,31 +51,11 @@ echo "Iniciando frontend..."
 ) &
 FRONTEND_PID=$!
 
-BACKEND_EXIT_CODE=""
-FRONTEND_EXIT_CODE=""
-
 set +e
-wait -n -p FINISHED_PID "$BACKEND_PID" "$FRONTEND_PID"
+wait -n
 FIRST_EXIT_CODE=$?
 set -e
 
-if [[ "$FINISHED_PID" == "$BACKEND_PID" ]]; then
-  BACKEND_EXIT_CODE="$FIRST_EXIT_CODE"
-elif [[ "$FINISHED_PID" == "$FRONTEND_PID" ]]; then
-  FRONTEND_EXIT_CODE="$FIRST_EXIT_CODE"
-fi
-
 cleanup
-
-set +e
-if [[ -z "$BACKEND_EXIT_CODE" ]]; then
-  wait "$BACKEND_PID" 2>/dev/null
-  BACKEND_EXIT_CODE=$?
-fi
-if [[ -z "$FRONTEND_EXIT_CODE" ]]; then
-  wait "$FRONTEND_PID" 2>/dev/null
-  FRONTEND_EXIT_CODE=$?
-fi
-set -e
 
 exit "$FIRST_EXIT_CODE"
