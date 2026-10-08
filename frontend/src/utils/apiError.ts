@@ -18,7 +18,18 @@ export class ApiError extends Error {
   /** Human-readable message suitable for direct display in the UI. */
   get displayMessage(): string {
     if (this.body?.detail && typeof this.body.detail === "string") {
-      return this.body.detail;
+      const detail = this.body.detail;
+      // Map known English backend errors to Spanish
+      if (detail === "No active account found with the given credentials") {
+        return "Correo o contraseña incorrectos.";
+      }
+      if (detail.includes("Given token not valid") || detail.includes("Token is invalid or expired")) {
+        return "Tu sesión ha expirado. Por favor, inicia sesión de nuevo.";
+      }
+      if (detail === "Internal server error.") {
+        return "Ocurrió un error en el servidor. Intenta de nuevo más tarde.";
+      }
+      return detail;
     }
     if (this.body) {
       const firstFieldErrors = Object.values(this.body).find(

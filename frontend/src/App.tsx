@@ -3,7 +3,6 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "./auth/AuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { MainLayout } from "./layouts/MainLayout";
-import { AdminLayout } from "./layouts/AdminLayout";
 
 import { HomePage } from "./pages/HomePage";
 import { SearchPage } from "./pages/SearchPage";
@@ -18,11 +17,7 @@ import { UploadPage } from "./pages/UploadPage";
 import { FavoritesPage } from "./pages/FavoritesPage";
 import { ReportsPage } from "./pages/ReportsPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
-
-import { AdminDashboardPage } from "./pages/admin/AdminDashboardPage";
-import { AdminReportsPage } from "./pages/admin/AdminReportsPage";
-import { AdminUsersPage } from "./pages/admin/AdminUsersPage";
-import { AdminAuditLogPage } from "./pages/admin/AdminAuditLogPage";
+import { EditorPage } from "./pages/editor";
 
 function App() {
   return (
@@ -75,33 +70,8 @@ function App() {
             <Route path="*" element={<NotFoundPage />} />
           </Route>
 
-          <Route
-            path="admin"
-            element={
-              <ProtectedRoute minRole="moderator">
-                <AdminLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<AdminDashboardPage />} />
-            <Route path="reports" element={<AdminReportsPage />} />
-            <Route
-              path="users"
-              element={
-                <ProtectedRoute minRole="admin">
-                  <AdminUsersPage />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="audit-logs"
-              element={
-                <ProtectedRoute minRole="admin">
-                  <AdminAuditLogPage />
-                </ProtectedRoute>
-              }
-            />
-          </Route>
+          {/* ── Editor: full-screen, outside MainLayout ── */}
+          <Route path="editor" element={<EditorPage />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

@@ -13,12 +13,19 @@ class EmailOrUsernameTokenObtainPairSerializer(TokenObtainPairSerializer):
     """Allow users to sign in with either username or email address."""
 
     def validate(self, attrs):
+        from rest_framework_simplejwt.exceptions import AuthenticationFailed
+
         login_value = attrs.get(self.username_field, "")
         if "@" in login_value:
             user = User.objects.filter(email__iexact=login_value).only("username").first()
             if user is not None:
                 attrs[self.username_field] = user.username
-        return super().validate(attrs)
+        try:
+            return super().validate(attrs)
+        except AuthenticationFailed:
+            raise AuthenticationFailed(
+                {"detail": "Correo o contraseña incorrectos."}
+            )
 
 
 class UserPublicSerializer(serializers.ModelSerializer):

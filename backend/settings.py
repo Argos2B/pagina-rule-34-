@@ -41,9 +41,11 @@ INSTALLED_APPS = [
 
     "corsheaders",
     "rest_framework",
+    "drf_spectacular",
     "rest_framework_simplejwt.token_blacklist",
     "django_filters",
 
+    "api",
     "accounts",
     "posts",
     "interactions",
@@ -91,15 +93,33 @@ TEMPLATES = [
 WSGI_APPLICATION = "backend.wsgi.application"
 
 
-DATABASES = {
-    "default": env.db(
-        "DATABASE_URL",
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-    ) if env("DATABASE_URL", default="") else {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+DATABASE_URL = env("DATABASE_URL", default="")
+POSTGRES_DB = env("POSTGRES_DB", default="")
+POSTGRES_USER = env("POSTGRES_USER", default="")
+POSTGRES_PASSWORD = env("POSTGRES_PASSWORD", default="")
+POSTGRES_HOST = env("POSTGRES_HOST", default="localhost")
+POSTGRES_PORT = env("POSTGRES_PORT", default="5432")
+
+if DATABASE_URL:
+    DATABASES = {"default": env.db("DATABASE_URL")}
+elif POSTGRES_DB and POSTGRES_USER and POSTGRES_PASSWORD:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": POSTGRES_DB,
+            "USER": POSTGRES_USER,
+            "PASSWORD": POSTGRES_PASSWORD,
+            "HOST": POSTGRES_HOST,
+            "PORT": POSTGRES_PORT,
+        }
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
 
 
 AUTH_USER_MODEL = "accounts.User"
@@ -166,10 +186,22 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # --- CORS / CSRF ---
 CORS_ALLOWED_ORIGINS = env.list(
     "CORS_ALLOWED_ORIGINS",
-    default=["http://localhost:5173", "http://127.0.0.1:5173"],
+    default=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:4173",
+        "http://127.0.0.1:4173",
+    ],
 )
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^http://localhost:\d+$",
+    r"^http://127\.0\.0\.1:\d+$",
+]
 CORS_ALLOW_CREDENTIALS = True
-CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS
+CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS + [
+    "http://localhost",
+    "http://127.0.0.1",
+]
 
 
 # --- Security hardening (safe defaults, stricter automatically outside DEBUG) ---
@@ -242,6 +274,15 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
         "rest_framework.renderers.BrowsableAPIRenderer",
     ],
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Universo 34 API",
+    "DESCRIPTION": "API v1 de Universo 34. Versionada y preparada para crecimiento sin romper la API legacy.",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": True,
+    "COMPONENT_SPLIT_REQUEST": True,
 }
 
 if not DEBUG:

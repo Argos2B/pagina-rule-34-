@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth/useAuth";
-import { isAdminOrAbove } from "../utils/roles";
 import { Avatar } from "./Avatar";
 import { SearchBar } from "./SearchBar";
 import styles from "./Navbar.module.css";
@@ -24,7 +23,7 @@ export function Navbar() {
         <Link to="/" className={styles.brand}>
           <img src="/logo.jpg" alt="Universo 34 Logo" className={styles.brandLogo} />
           <span className={styles.brandText}>
-            UNIVERSO <span className={styles.brandAccent}>34</span>
+            Sin título
           </span>
         </Link>
 
@@ -62,11 +61,15 @@ export function Navbar() {
             </>
           )}
 
-          {isAuthenticated && isAdminOrAbove(user?.role) && (
-            <NavLink to="/admin" className={styles.link} onClick={() => setMenuOpen(false)}>
-              Administración
-            </NavLink>
-          )}
+          {/* ── Editor de Vídeo ── */}
+          <NavLink
+            to="/editor"
+            className={styles.editorBtn}
+            onClick={() => setMenuOpen(false)}
+            title="Abrir editor de vídeo"
+          >
+            ▶ Editor
+          </NavLink>
 
           {isAuthenticated && user ? (
             <div className={styles.userMenu}>

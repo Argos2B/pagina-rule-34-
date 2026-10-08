@@ -13,7 +13,7 @@ export function MainLayout() {
       <footer className={styles.footer}>
         <div className={`container ${styles.footerContent}`}>
           <img src="/logo.jpg" alt="Universo 34 Logo" className={styles.footerLogo} />
-          <p>Universo 34 — Rule 34 · Sin Límites</p>
+          <p>Sin texto</p>
         </div>
       </footer>
     </>

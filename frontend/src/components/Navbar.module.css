@@ -176,6 +176,35 @@
   box-shadow: 0 0 10px rgba(244, 63, 94, 0.2);
 }
 
+/* ── Editor button ── */
+.editorBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(236, 72, 153, 0.1));
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  color: var(--color-accent-hover) !important;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.editorBtn:hover,
+.editorBtn:focus-visible {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(236, 72, 153, 0.2));
+  border-color: rgba(168, 85, 247, 0.6);
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.25);
+  transform: translateY(-1px);
+}
+
+.editorBtn::after {
+  display: none !important;
+}
+
 @media (max-width: 900px) {
   .bar {
     flex-wrap: wrap;

@@ -1,4 +1,5 @@
 from django.utils.text import slugify
+from django.db import transaction
 from rest_framework import serializers
 
 from .models import Category, Post, Tag
@@ -27,7 +28,11 @@ class TagField(serializers.SlugRelatedField):
         super().__init__(**kwargs)
 
     def to_internal_value(self, data):
+        # Normalize the incoming tag value: strip whitespace, lower-case
+        # and remove any leading '#' characters that users may include.
         name = str(data).strip().lower()
+        # remove leading hashmarks often typed by users (e.g. "#aurora")
+        name = name.lstrip("#").strip()
         if not name:
             raise serializers.ValidationError("El nombre de la etiqueta no puede estar vacío.")
         tag, _created = Tag.objects.get_or_create(name=name, defaults={"slug": slugify(name)})
@@ -67,14 +72,19 @@ class PostSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         tags = validated_data.pop("tags", [])
-        post = Post.objects.create(**validated_data)
-        if tags:
-            post.tags.set(tags)
+        # Wrap creation in a transaction to avoid partially-created posts
+        # in case tag association or subsequent operations fail.
+        with transaction.atomic():
+            post = Post.objects.create(**validated_data)
+            if tags:
+                post.tags.set(tags)
         return post
 
     def update(self, instance, validated_data):
         tags = validated_data.pop("tags", None)
-        instance = super().update(instance, validated_data)
-        if tags is not None:
-            instance.tags.set(tags)
+        # Use transaction for update that may touch M2M relationships.
+        with transaction.atomic():
+            instance = super().update(instance, validated_data)
+            if tags is not None:
+                instance.tags.set(tags)
         return instance
